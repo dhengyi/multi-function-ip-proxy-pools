@@ -2,6 +2,8 @@ package ip.proxy.pool.grabutil;
 
 import ip.proxy.pool.ipfilter.IPFilter;
 import ip.proxy.pool.ipmodel.IPMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +18,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 
 public class IPCollection {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(IPCollection.class);
 
     // 成员变量（非线程安全）
     private List<IPMessage> ipMessages;
@@ -39,7 +43,7 @@ public class IPCollection {
             String url;
 
             if (urls.isEmpty()) {
-                System.out.println("当前线程：" + Thread.currentThread().getName() + "，发现任务队列已空");
+                LOGGER.info("任务队列已空");
                 break;
             }
 
@@ -73,11 +77,9 @@ public class IPCollection {
 
             // 将质量合格的ip合并到共享变量ipMessages中，进行合并的时候保证原子性
             readWriteLock.writeLock().lock();
-            System.out.println("当前线程：" + Thread.currentThread().getName() + "已进入合并区，" +
-                    "待合并大小 ipMessages1：" + ipMessages1.size());
+            LOGGER.info("已进入合并区，待合并大小ipMessages1：{}", ipMessages1.size());
             ipMessages.addAll(ipMessages1);
-            System.out.println("当前线程：" + Thread.currentThread().getName() + "已成功合并，" +
-                    "合并后ipMessage大小：" + ipMessages.size());
+            LOGGER.info("已成功合并，合并后ipMessage大小：{}", ipMessages.size());
             readWriteLock.writeLock().unlock();
         }
     }

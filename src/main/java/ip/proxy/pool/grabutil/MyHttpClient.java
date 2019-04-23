@@ -7,6 +7,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -18,7 +20,9 @@ import java.io.IOException;
 
 class MyHttpClient {
 
-    // 使用本机IP进行网站抓取
+    private static final Logger LOGGER = LoggerFactory.getLogger(MyHttpClient.class);
+
+    // 使用本机ip进行网站抓取
     static String getHtml(String url) {
         String entity = null;
         CloseableHttpResponse httpResponse = null;
@@ -50,11 +54,11 @@ class MyHttpClient {
             int httpStatus = httpResponse.getStatusLine().getStatusCode();
             if (httpStatus == 200) {
                 entity = EntityUtils.toString(httpResponse.getEntity(), "utf-8");
-            } else {
-                System.out.println("本机ip抓取xici代理网第一页ip返回状态码：" + httpStatus);
             }
+
+            LOGGER.info("本机ip抓取xici代理网第一页ip返回状态码，httpStatus：{}", httpStatus);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("使用本机ip抓取xici代理网第一页出现异常，e：{}", e);
         } finally {
             closeResources(httpResponse, httpClient);
         }
@@ -95,14 +99,13 @@ class MyHttpClient {
             int httpStatus = httpResponse.getStatusLine().getStatusCode();
             if (httpStatus == 200) {
                 entity = EntityUtils.toString(httpResponse.getEntity(), "utf-8");
-                System.out.println("当前线程：" + Thread.currentThread().getName() + ", 使用的代理ip：" +
-                        ip + ":" + port + ", 成功抓取xici代理网：" + url);
+                LOGGER.info("使用代理ip：{}:{}，成功抓取xici代理网：{}", ip, port, url);
             } else {
-                System.out.println("当前线程：" + Thread.currentThread().getName() + ", 使用的代理ip：" +
-                        ip + ":" + port + ", 抓取xici代理网：" + url + ", 返回状态码：" + httpStatus);
+                LOGGER.info("使用代理ip：{}:{}，抓取xici代理网：{}，返回状态码：{}", ip, port, url, httpStatus);
             }
         } catch (IOException e) {
             entity = null;
+            LOGGER.warn("使用代理ip：{}:{}，抓取xici代理网：{}，出现异常，e：" + e, ip, port, url);
         } finally {
             closeResources(httpResponse, httpClient);
         }
@@ -119,8 +122,9 @@ class MyHttpClient {
             if (httpClient != null) {
                 httpClient.close();
             }
+            LOGGER.info("httpResponse，httpClient资源关闭成功");
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("httpResponse，httpClient资源关闭出现异常，e：{}", e);
         }
     }
 }

@@ -6,6 +6,8 @@ import ip.proxy.pool.grabutil.URLAnalysis;
 import ip.proxy.pool.ipfilter.IPFilter;
 import ip.proxy.pool.ipmodel.IPMessage;
 import ip.proxy.pool.jobthread.IPGrabThread;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -16,6 +18,8 @@ import java.util.*;
  */
 
 public class MyTimeJob extends TimerTask {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MyTimeJob.class);
 
     // ip代理池线程是生产者，此锁用来实现等待/通知机制，实现生产者与消费者模型
     private final Object lock;
@@ -34,7 +38,7 @@ public class MyTimeJob extends TimerTask {
         while (true) {
             while (myRedis.isEmpty()) {
                 synchronized (lock) {
-                    System.out.println("当前线程：" + Thread.currentThread().getName() + ", 开始更新ip代理池");
+                    LOGGER.info("ip代理池，开始更新...");
 
                     // 存放爬取下来的ip信息
                     List<IPMessage> ipMessages = new LinkedList<>();
@@ -70,14 +74,14 @@ public class MyTimeJob extends TimerTask {
                         try {
                             thread.join();
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            LOGGER.error("调用thread.join出现异常，e：{}", e);
                         }
                     }
 
                     // 将爬取下来的ip信息写进Redis数据库中(List集合)
                     myRedis.setIPToList(ipMessages);
 
-                    System.out.println("当前线程：" + Thread.currentThread().getName() + ", ip代理池已经更新完毕");
+                    LOGGER.info("ip代理池已经更新完毕...");
 
                     lock.notifyAll();
                 }
