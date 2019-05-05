@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <ips number="1"><!-- 用户设定的待抓取网站ip地址，number值表示本次并发抓取的网站数，最小/默认为1，最大为5 -->
+        <ip>{ip地址}<!-- ip地址中需要包含页码占位符，后端需要重新构造url，方便抓取更多代理ip --></ip>
+    </ips>
+    <dom_1><!-- 根据ips中number的值生成相应数量的dom结构，dom_1代表第一个ip地址对应的网页结构，依次类推 -->
+        <label_1><!-- 标签1，通常代表table标签 -->
+            <name>{标签名}</name>
+            <attribute>
+                <name>{属性名}<!-- 可以指定为null，表示无属性 --></name>
+                <value>{属性值}</value>
+            </attribute>
+        </label_1>
+        <label_2><!-- 标签2，通常代表thead标签，表示表格头 -->
+            <name>{标签名}<!-- 可以指定为null，表示无表格头 --></name>
+            <attribute>
+                <name>{属性名}<!-- 可以指定为null，表示无属性 --></name>
+                <value>{属性值}</value>
+            </attribute>
+        </label_2>
+        <label_3><!-- 标签3，通常代表tbody标签，表示表格数据，当thead为null时，表格头通常包含在tbody中 -->
+            <name>{标签名}</name>
+            <attribute>
+                <name>{属性名}<!-- 可以指定为null，表示无属性 --></name>
+                <value>{属性值}</value>
+            </attribute>
+        </label_3>
+    </dom_1>
+</config>
