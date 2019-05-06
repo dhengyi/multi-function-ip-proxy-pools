@@ -16,7 +16,6 @@ public class SiteTemplateInfo {
     public SiteTemplateInfo() {
     }
 
-
     public SiteTemplateInfo(String url, HtmlLabelInfo htmlLabelInfo1, HtmlLabelInfo htmlLabelInfo2,
                             HtmlLabelInfo htmlLabelInfo3) {
         this.url = url;

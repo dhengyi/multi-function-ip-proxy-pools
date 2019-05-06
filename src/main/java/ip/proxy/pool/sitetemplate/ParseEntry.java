@@ -22,10 +22,6 @@ import java.util.List;
 
 public class ParseEntry {
 
-    public static void main(String[] args) {
-        System.out.println(JSONObject.toJSONString(parseTemplate()));
-    }
-
     public static List<SiteTemplateInfo> parseTemplate() {
         Document doc = getDocument();
 
