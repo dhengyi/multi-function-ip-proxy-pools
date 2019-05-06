@@ -1,6 +1,5 @@
 package ip.proxy.pool.sitetemplate;
 
-import com.alibaba.fastjson.JSONObject;
 import ip.proxy.pool.model.HtmlLabelInfo;
 import ip.proxy.pool.model.SiteTemplateInfo;
 import org.dom4j.Document;
