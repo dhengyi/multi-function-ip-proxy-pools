@@ -1,4 +1,4 @@
-package ip.proxy.pool.ipmodel;
+package ip.proxy.pool.model;
 
 import java.io.Serializable;
 

@@ -1,4 +1,4 @@
-package ip.proxy.pool.gentemplate;
+package ip.proxy.pool.sitetemplate;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -15,7 +15,7 @@ import java.nio.file.Paths;
 /**
  * @author dhengyi
  * @create 2019/05/03 23:39
- * @description 解析模板生成类
+ * @description 模板生成类
  */
 
 public class GenEntry {

@@ -1,13 +1,13 @@
 package ip.proxy.pool.api;
 
-import ip.proxy.pool.gentemplate.GenEntry;
+import ip.proxy.pool.sitetemplate.GenEntry;
 import ip.proxy.pool.utilclass.ParamValidateUtil;
 import org.dom4j.Document;
 
 /**
  * @author dhengyi
  * @create 2019/05/05 22:54
- * @description 解析模板生成类--api接口
+ * @description 模板生成类--api接口
  */
 
 public class SiteTemplate {

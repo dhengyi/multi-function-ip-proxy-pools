@@ -1,7 +1,7 @@
 package ip.proxy.pool.dbtool;
 
 import ip.proxy.pool.dbconfig.RedisConfig;
-import ip.proxy.pool.ipmodel.IPMessage;
+import ip.proxy.pool.model.IPMessage;
 import ip.proxy.pool.utilclass.SerializeUtil;
 import redis.clients.jedis.Jedis;
 

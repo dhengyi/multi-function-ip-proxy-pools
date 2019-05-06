@@ -1,6 +1,6 @@
 package ip.proxy.pool.grabutil;
 
-import ip.proxy.pool.ipmodel.IPMessage;
+import ip.proxy.pool.model.IPMessage;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;

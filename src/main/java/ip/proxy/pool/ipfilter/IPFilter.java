@@ -1,6 +1,6 @@
 package ip.proxy.pool.ipfilter;
 
-import ip.proxy.pool.ipmodel.IPMessage;
+import ip.proxy.pool.model.IPMessage;
 
 import java.util.LinkedList;
 import java.util.List;

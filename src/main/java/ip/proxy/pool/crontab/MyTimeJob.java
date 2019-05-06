@@ -4,7 +4,7 @@ import ip.proxy.pool.dbtool.MyRedis;
 import ip.proxy.pool.grabutil.IPCollection;
 import ip.proxy.pool.grabutil.URLAnalysis;
 import ip.proxy.pool.ipfilter.IPFilter;
-import ip.proxy.pool.ipmodel.IPMessage;
+import ip.proxy.pool.model.IPMessage;
 import ip.proxy.pool.jobthread.IPGrabThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
