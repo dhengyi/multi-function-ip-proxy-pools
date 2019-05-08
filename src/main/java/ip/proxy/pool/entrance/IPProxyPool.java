@@ -1,10 +1,15 @@
 package ip.proxy.pool.entrance;
 
+import ip.proxy.pool.dbtool.MyRedis;
+import ip.proxy.pool.model.IPMessage;
 import ip.proxy.pool.thread.SiteThread;
 import ip.proxy.pool.model.SiteTemplateInfo;
 import ip.proxy.pool.sitetemplate.ParseEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -15,15 +20,22 @@ import java.util.List;
 
 public class IPProxyPool {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(IPProxyPool.class);
+
     // ip代理池执行入口
     public static void startExecute() {
+        MyRedis myRedis = new MyRedis();
+
         List<SiteTemplateInfo> siteTemplateInfos = ParseEntry.parseTemplate();
+
+        // 存储抓取到的所有代理ip
+        List<IPMessage> ipMessagesAll = new LinkedList<>();
 
         // 对创建的子线程进行收集
         List<Thread> threads = new ArrayList<>();
 
         for (int i = 0; i < siteTemplateInfos.size(); i++) {
-            Thread site = new Thread(new SiteThread(siteTemplateInfos.get(i)));
+            Thread site = new Thread(new SiteThread(siteTemplateInfos.get(i), ipMessagesAll));
             site.setName("site-thread-" + i);
             threads.add(site);
             site.start();
@@ -36,13 +48,10 @@ public class IPProxyPool {
                 e.printStackTrace();
             }
         });
-    }
 
-    // lock用来实现生产者/消费者模型
-//    public static void startExecute(Object lock) {
-//        // 根据xml文件中提供的ip地址，开辟对应的抓取线程
-//        Thread ipProxyPool = new Thread(new IPProxyPoolThread(lock));
-//        ipProxyPool.setName("ip-proxy-pool");
-//        ipProxyPool.start();
-//    }
+        // 将ip存储至Redis数据库中
+//        myRedis.setIPToList(ipMessagesAll);
+
+        LOGGER.info("ipMessagesAll.size：{}", ipMessagesAll.size());
+    }
 }

@@ -6,9 +6,12 @@ import ip.proxy.pool.model.SiteTemplateInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author dhengyi
@@ -20,10 +23,14 @@ public class SiteThread implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SiteThread.class);
 
-    private final SiteTemplateInfo siteTemplateInfo;
+    private ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
-    public SiteThread(SiteTemplateInfo siteTemplateInfo) {
+    private SiteTemplateInfo siteTemplateInfo;
+    private List<IPMessage> ipMessagesAll;
+
+    public SiteThread(SiteTemplateInfo siteTemplateInfo, List<IPMessage> ipMessagesAll) {
         this.siteTemplateInfo = siteTemplateInfo;
+        this.ipMessagesAll = ipMessagesAll;
     }
 
     @Override
@@ -32,11 +39,27 @@ public class SiteThread implements Runnable {
 
         List<IPMessage> ipMessages = getIPMessagesFromSiteFirstPage(urls.poll(), siteTemplateInfo);
 
-//        for (int i = 0; i < urls.size(); i++) {
-//            Thread jobThread = new Thread(new JobThread(urls.poll()));
-//            jobThread.setName(Thread.currentThread().getName() + "-thread-" + i);
-//            jobThread.start();
-//        }
+        List<Thread> threads = new ArrayList<>();
+
+        for (int i = 0; urls.size() != 0; i++) {
+            Thread jobThread = new Thread(new JobThread(readWriteLock, urls.poll(), ipMessages, siteTemplateInfo));
+            jobThread.setName(Thread.currentThread().getName() + "-childthread-" + i);
+            threads.add(jobThread);
+            jobThread.start();
+        }
+
+        threads.forEach(param -> {
+            try {
+                param.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+
+        synchronized (SiteThread.class) {
+            ipMessagesAll.addAll(ipMessages);
+            LOGGER.info("已合并ipMessages：{}，ipMessagesAll：{}", ipMessages.size(), ipMessagesAll.size());
+        }
     }
 
     // 构造URL，创建任务队列

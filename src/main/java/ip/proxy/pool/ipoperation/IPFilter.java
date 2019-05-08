@@ -1,4 +1,4 @@
-package ip.proxy.pool.ipfilter;
+package ip.proxy.pool.ipoperation;
 
 import ip.proxy.pool.model.IPMessage;
 

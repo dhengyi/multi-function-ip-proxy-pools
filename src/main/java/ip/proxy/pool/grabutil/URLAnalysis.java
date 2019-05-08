@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 /**
  * @author dhengyi
@@ -29,6 +28,7 @@ public class URLAnalysis {
         String html = MyHttpClient.getHtml(url);
 
         if (html == null) {
+            LOGGER.error("使用本机ip，访问url：{}，返回html：null", url);
             throw new RuntimeException();
         }
 
@@ -36,12 +36,13 @@ public class URLAnalysis {
     }
 
     // 使用代理ip解析任务队列
-    public static List<IPMessage> parseQueueByProxyIP(Queue<String> url, String ip,
-                                                      String port, SiteTemplateInfo siteTemplateInfo) {
-        String html = MyHttpClient.getHtml(url.poll(), ip, port);
+    public static List<IPMessage> parseQueueByProxyIP(String url, String ipAddress,
+                                                      String ipPort, SiteTemplateInfo siteTemplateInfo) {
+        String html = MyHttpClient.getHtml(url, ipAddress, ipPort);
 
         if (html == null) {
-            throw new RuntimeException();
+            LOGGER.warn("使用代理ip：{}，访问url：{}，返回html：null", ipAddress + ":" + ipPort, url);
+            return null;
         }
 
         return extractIPMessages(html, siteTemplateInfo);
