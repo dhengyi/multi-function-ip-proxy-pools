@@ -5,7 +5,7 @@ import ip.proxy.pool.grabutil.IPCollection;
 import ip.proxy.pool.grabutil.URLAnalysis;
 import ip.proxy.pool.ipfilter.IPFilter;
 import ip.proxy.pool.model.IPMessage;
-import ip.proxy.pool.jobthread.IPGrabThread;
+import ip.proxy.pool.thread.IPGrabThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,7 @@ public class MyTimeJob extends TimerTask {
 
                     // 首先使用本机ip爬取xici代理网第一页
                     String url = "http://www.xicidaili.com/nn/1";
-                    URLAnalysis.urlParse(url, ipMessages);
+//                    URLAnalysis.urlParse(url, ipMessages);
                     // 对得到的ip进行筛选，将ip速度在三秒以内的并且类型是https的留下，其余删除
                     ipMessages = IPFilter.filter(ipMessages);
 

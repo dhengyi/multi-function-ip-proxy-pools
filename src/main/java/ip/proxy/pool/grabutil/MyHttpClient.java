@@ -15,14 +15,14 @@ import java.io.IOException;
 /**
  * @author dhengyi
  * @create 2019/04/15 18:15
- * @description 模拟HTTP请求
+ * @description HTTP请求模拟类
  */
 
 class MyHttpClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MyHttpClient.class);
 
-    // 使用本机ip进行网站抓取
+    // 使用本机ip构造请求
     static String getHtml(String url) {
         String entity = null;
         CloseableHttpResponse httpResponse = null;
@@ -38,10 +38,8 @@ class MyHttpClient {
                 "q=0.9,image/webp,*/*;q=0.8");
         httpGet.setHeader("Accept-Encoding", "gzip, deflate, sdch");
         httpGet.setHeader("Accept-Language", "zh-CN,zh;q=0.8");
-        httpGet.setHeader("Cache-Control", "no-cache");
+        httpGet.setHeader("Cache-Control", "max-age=0");
         httpGet.setHeader("Connection", "keep-alive");
-        httpGet.setHeader("Host", "www.xicidaili.com");
-        httpGet.setHeader("Pragma", "no-cache");
         httpGet.setHeader("Upgrade-Insecure-Requests", "1");
         httpGet.setHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 " +
                 "(KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36");
@@ -56,9 +54,9 @@ class MyHttpClient {
                 entity = EntityUtils.toString(httpResponse.getEntity(), "utf-8");
             }
 
-            LOGGER.info("本机ip抓取xici代理网第一页ip返回状态码，httpStatus：{}", httpStatus);
+            LOGGER.info("本机ip抓取：{}，返回状态码httpStatus：{}", url, httpStatus);
         } catch (IOException e) {
-            LOGGER.error("使用本机ip抓取xici代理网第一页出现异常，e：{}", e);
+            LOGGER.error("本机ip抓取：" + url + "，出现异常e：{}", e);
         } finally {
             closeResources(httpResponse, httpClient);
         }

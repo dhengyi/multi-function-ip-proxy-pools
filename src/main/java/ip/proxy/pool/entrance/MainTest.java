@@ -9,8 +9,9 @@ import ip.proxy.pool.logutil.LogManager;
  */
 
 public class MainTest {
+
     public static void main(String[] args) {
         LogManager.init();
-        IPProxyPool.startExecute(new Object());
+        IPProxyPool.startExecute();
     }
 }

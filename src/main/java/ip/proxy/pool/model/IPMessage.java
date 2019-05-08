@@ -11,76 +11,66 @@ import java.io.Serializable;
 public class IPMessage implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private String IPAddress;
-    private String IPPort;
-    private String IPType;
-    private String IPSpeed;
-    private int useCount;            // 使用计数器，连续三次这个ip不能使用，就将其从ip代理池中进行清除
+    private String ipAddress;
+    private String ipPort;
+    // 加入ipType字段是为了向前兼容
+    private String ipType;
+    private int useCount;   // 计数器，连续三次这个ip不能使用，就将其从ip代理池中清除
 
     public IPMessage() {
         this.useCount = 0;
     }
 
-    public IPMessage(String IPAddress, String IPPort, String IPType, String IPSpeed) {
-        this.IPAddress = IPAddress;
-        this.IPPort = IPPort;
-        this.IPType = IPType;
-        this.IPSpeed = IPSpeed;
-        this.useCount = 0;
+    public IPMessage(String ipAddress, String ipPort, String ipType, int useCount) {
+        this.ipAddress = ipAddress;
+        this.ipPort = ipPort;
+        this.ipType = ipType;
+        this.useCount = useCount;
     }
 
-    public String getIPAddress() {
-        return IPAddress;
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
     }
 
-    public void setIPAddress(String IPAddress) {
-        this.IPAddress = IPAddress;
+    public String getIpAddress() {
+        return ipAddress;
     }
 
-    public String getIPPort() {
-        return IPPort;
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
     }
 
-    public void setIPPort(String IPPort) {
-        this.IPPort = IPPort;
+    public String getIpPort() {
+        return ipPort;
     }
 
-    public String getIPType() {
-        return IPType;
+    public void setIpPort(String ipPort) {
+        this.ipPort = ipPort;
     }
 
-    public void setIPType(String IPType) {
-        this.IPType = IPType;
+    public String getIpType() {
+        return ipType;
     }
 
-    public String getIPSpeed() {
-        return IPSpeed;
-    }
-
-    public void setIPSpeed(String IPSpeed) {
-        this.IPSpeed = IPSpeed;
+    public void setIpType(String ipType) {
+        this.ipType = ipType;
     }
 
     public int getUseCount() {
         return useCount;
     }
 
-    public void setUseCount() {
-        this.useCount++;
-    }
-
-    public void initCount() {
-        this.useCount = 0;
+    public void setUseCount(int useCount) {
+        this.useCount = useCount;
     }
 
     @Override
     public String toString() {
         return "IPMessage{" +
-                "IPAddress='" + IPAddress + '\'' +
-                ", IPPort='" + IPPort + '\'' +
-                ", IPType='" + IPType + '\'' +
-                ", IPSpeed='" + IPSpeed + '\'' +
-                ", useCount='" + useCount + '\'' +
+                "ipAddress='" + ipAddress + '\'' +
+                ", ipPort='" + ipPort + '\'' +
+                ", ipType='" + ipType + '\'' +
+                ", useCount=" + useCount +
                 '}';
     }
 }

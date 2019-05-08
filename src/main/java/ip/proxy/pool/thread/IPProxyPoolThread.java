@@ -1,4 +1,4 @@
-package ip.proxy.pool.jobthread;
+package ip.proxy.pool.thread;
 
 import ip.proxy.pool.crontab.MyTimer;
 
