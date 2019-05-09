@@ -62,6 +62,10 @@ public class URLAnalysis {
             ipMessageIndex = getIPMessageIndexWithTableHead(document, siteTemplateInfo);
         }
 
+        if (ipMessageIndex == null) {
+            return null;
+        }
+
         // 确定表格提供的代理ip信息所在标签行
         Elements trs = getIPElements(document, siteTemplateInfo);
 
@@ -88,7 +92,15 @@ public class URLAnalysis {
                     siteTemplateInfo.getHtmlLabelInfo3().getAttributeValue() + "]";
         }
 
-        Element tableHeadTr = document.select(tableInfo).select(tbodyInfo).select("tr").get(0);
+        // 有可能出现网页返回内容出错的问题
+        Element tableHeadTr;
+        try {
+            tableHeadTr = document.select(tableInfo).select(tbodyInfo).select("tr").get(0);
+        } catch (IndexOutOfBoundsException ignored) {
+            LOGGER.warn("html：" + document.html() + ", ignored：{}", ignored);
+            return null;
+        }
+
         // TODO: 这里写死了标签名为th，实际上还有可能为td（66代理网）
         Elements ipMessageIndexs = tableHeadTr.select("th");
 
@@ -110,7 +122,15 @@ public class URLAnalysis {
                     siteTemplateInfo.getHtmlLabelInfo2().getAttributeValue() + "]";
         }
 
-        Element tableHeadTr = document.select(tableInfo).select(theadInfo).select("tr").get(0);
+        // 有可能出现网页返回内容出错的问题
+        Element tableHeadTr;
+        try {
+            tableHeadTr = document.select(tableInfo).select(theadInfo).select("tr").get(0);
+        } catch (IndexOutOfBoundsException ignored) {
+            LOGGER.warn("html：" + document.html() + ", ignored：{}", ignored);
+            return null;
+        }
+
         Elements ipMessageIndexs = tableHeadTr.select("th");
 
         return getIPMessageIndex(ipMessageIndexs);
