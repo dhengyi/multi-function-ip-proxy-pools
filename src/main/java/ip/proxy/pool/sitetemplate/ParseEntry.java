@@ -21,6 +21,7 @@ import java.util.List;
 
 public class ParseEntry {
 
+    // 解析模板
     public static List<SiteTemplateInfo> parseTemplate() {
         Document doc = getDocument();
 

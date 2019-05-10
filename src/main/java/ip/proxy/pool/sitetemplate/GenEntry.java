@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 
 public class GenEntry {
 
+    // 生成模板内容
     public static Document genTemplate(Integer number) {
         Document doc = DocumentHelper.createDocument();
         // 添加根节点
@@ -67,6 +68,7 @@ public class GenEntry {
         return doc;
     }
 
+    // 生成xml文件
     public static void saveDocument(Document doc) {
         String rootPath = System.getProperty("user.dir");
         Path dirPath = Paths.get(rootPath + "/template");

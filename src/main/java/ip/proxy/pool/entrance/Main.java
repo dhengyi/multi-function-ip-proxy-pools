@@ -18,19 +18,20 @@ import java.util.List;
  * @description 执行ip代理池
  */
 
-public class IPProxyPool {
+public class Main {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(IPProxyPool.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     // ip代理池执行入口
     public static void startExecute() {
+        LOGGER.info("ip代理池开始更新...");
+
         MyRedis myRedis = new MyRedis();
 
         List<SiteTemplateInfo> siteTemplateInfos = ParseEntry.parseTemplate();
 
         // 存储抓取到的所有代理ip
         List<IPMessage> ipMessagesAll = new LinkedList<>();
-
         // 对创建的子线程进行收集
         List<Thread> threads = new ArrayList<>();
 
@@ -52,6 +53,6 @@ public class IPProxyPool {
         // 将ip存储至Redis数据库中
 //        myRedis.setIPToList(ipMessagesAll);
 
-        LOGGER.info("ipMessagesAll.size：{}", ipMessagesAll.size());
+        LOGGER.info("ip代理池更新完毕，ipMessagesAll.size：{}", ipMessagesAll.size());
     }
 }

@@ -109,6 +109,7 @@ class MyHttpClient {
         return entity;
     }
 
+    // 资源关闭
     private static void closeResources(CloseableHttpResponse httpResponse, CloseableHttpClient httpClient) {
         try {
             if (httpResponse != null) {
