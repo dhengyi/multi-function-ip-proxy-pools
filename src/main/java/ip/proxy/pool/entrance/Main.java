@@ -51,7 +51,7 @@ public class Main {
         });
 
         // 将ip存储至Redis数据库中
-//        myRedis.setIPToList(ipMessagesAll);
+        myRedis.setIPToList(ipMessagesAll);
 
         LOGGER.info("ip代理池更新完毕，ipMessagesAll.size：{}", ipMessagesAll.size());
     }

@@ -1,36 +1,47 @@
 package ip.proxy.pool.grabutil;
 
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
+import org.apache.http.NoHttpResponseException;
+import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.config.SocketConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.net.UnknownHostException;
 
 /**
  * @author dhengyi
  * @create 2019/04/15 18:15
  * @description HTTP请求模拟类
+ *              关于HttpClient的使用，有许多大坑，推荐大家多在网上查阅一些相关资料
  */
 
-class MyHttpClient {
+public class MyHttpClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MyHttpClient.class);
 
     // 使用本机ip构造请求
-    static String getHtml(String url) {
+    public static String getHtml(String url) {
+        CloseableHttpClient httpClient = getHttpClient();
         String entity = null;
         CloseableHttpResponse httpResponse = null;
-        CloseableHttpClient httpClient = HttpClients.createDefault();
 
-        // 设置超时处理(猜测setConnectTimeout是与网站建立HTTP链接的时间，setSocketTimeout是从网站获取数据的时间)
-        RequestConfig config = RequestConfig.custom().setConnectTimeout(3000).
-                setSocketTimeout(3000).build();
+        // 设置超时处理
+        RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(1000).setConnectTimeout(1000).
+                setSocketTimeout(1000).build();
         HttpGet httpGet = new HttpGet(url);
         httpGet.setConfig(config);
 
@@ -66,15 +77,15 @@ class MyHttpClient {
     }
 
     // 对上一个方法的重载，使用代理进行网站爬取
-    static String getHtml(String url, String ipAddress, String ipPort) {
+    public static String getHtml(String url, String ipAddress, String ipPort) {
+        CloseableHttpClient httpClient = getHttpClient();
         String entity = null;
-        CloseableHttpClient httpClient = HttpClients.createDefault();
         CloseableHttpResponse httpResponse = null;
 
         // 设置代理访问和超时处理
         HttpHost proxy = new HttpHost(ipAddress, Integer.valueOf(ipPort));
-        RequestConfig config = RequestConfig.custom().setProxy(proxy).setConnectTimeout(1000).
-                setSocketTimeout(1000).build();
+        RequestConfig config = RequestConfig.custom().setProxy(proxy).setConnectionRequestTimeout(1000).
+                setConnectTimeout(1000).setSocketTimeout(1000).build();
         HttpGet httpGet = new HttpGet(url);
         httpGet.setConfig(config);
 
@@ -107,6 +118,47 @@ class MyHttpClient {
         }
 
         return entity;
+    }
+
+    // 获取HttpClient--自定义HttpClient配置参数，关闭重试机制并且防止无限等待
+    private static CloseableHttpClient getHttpClient() {
+        // 连接成功后，多长时间数据没有返回断开连接
+        SocketConfig socketConfig = SocketConfig.custom().setSoTimeout(1000).build();
+
+        // 设置HttpClient关闭重试机制
+        HttpRequestRetryHandler httpRequestRetryHandler = (exception, executionCount, context) -> {
+            if (executionCount > 0) {       // 不进行重试
+                return false;
+            }
+            if (exception instanceof NoHttpResponseException) {     // 如果服务器丢掉了连接，那么就重试
+                return false;
+            }
+            if (exception instanceof SSLHandshakeException) {       // 不要重试SSL握手异常
+                return false;
+            }
+            if (exception instanceof InterruptedIOException) {      // 超时
+                return false;
+            }
+            if (exception instanceof UnknownHostException) {        // 目标服务器不可达
+                return false;
+            }
+            if (exception instanceof SSLException) {        // SSL握手异常
+                return false;
+            }
+
+            HttpClientContext clientContext = HttpClientContext
+                    .adapt(context);
+            HttpRequest request = clientContext.getRequest();
+            // 请求幂等
+            if (!(request instanceof HttpEntityEnclosingRequest)) {
+                return false;
+            }
+
+            return false;
+        };
+
+        return HttpClients.custom().setDefaultSocketConfig(socketConfig).
+                setRetryHandler(httpRequestRetryHandler).build();
     }
 
     // 资源关闭
