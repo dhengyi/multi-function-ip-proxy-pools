@@ -1,6 +1,7 @@
 package ip.proxy.pool.entrance;
 
 import ip.proxy.pool.dbtool.MyRedis;
+import ip.proxy.pool.logutil.LogManager;
 import ip.proxy.pool.model.IPMessage;
 import ip.proxy.pool.thread.SiteThread;
 import ip.proxy.pool.model.SiteTemplateInfo;

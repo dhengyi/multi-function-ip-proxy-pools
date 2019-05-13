@@ -2,6 +2,7 @@ package ip.proxy.pool.api;
 
 import ip.proxy.pool.dbtool.MyRedis;
 import ip.proxy.pool.entrance.Main;
+import ip.proxy.pool.logutil.LogManager;
 import ip.proxy.pool.model.IPMessage;
 import ip.proxy.pool.sitetemplate.GenEntry;
 import ip.proxy.pool.utilclass.ParamValidateUtil;
@@ -21,11 +22,15 @@ import java.util.concurrent.locks.ReadWriteLock;
  */
 
 public class IPProxyPool {
+
+    static {
+        LogManager.init();
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(IPProxyPool.class);
 
-    // TODO: 到底应该将Redis设计为单例还是多例还有待考量
-    // 将MyRedis设置为单例
-    private static MyRedis myRedis = new MyRedis();
+    // TODO: 将Redis设计为单例会有问题
+    private MyRedis myRedis = new MyRedis();
 
     // 生成模板
     public static void genTemplate() {
@@ -68,37 +73,39 @@ public class IPProxyPool {
         }
     }
 
-    // 获取ip
-    public static IPMessage getIPMessage() {
-        ReadWriteLock readWriteLock = MyRedis.getReadWriteLock();
+    /*
+      获取ip，此方法有可能返回null值，需要进行NPE检查
+      客户端若获取到null值，则重新调用此方法，触发ip代理池更新即可
+     */
+    public IPMessage getIPMessage() {
+        IPMessage ipMessage;
         // 判断ip代理池是否已经启动更新
         boolean flag = false;
 
         // 当ip代理池为空时，更新ip代理池
-        readWriteLock.writeLock().lock();
-        while (myRedis.isEmpty()) {
-            if (!flag) {
-                Main.startExecute();
+        synchronized (IPProxyPool.class) {
+            while (myRedis.isEmpty()) {
+                LOGGER.info("IPProxyPool已空");
+                if (!flag) {
+                    Main.startExecute();
+                }
+
+                flag = true;
             }
 
-            flag = true;
+            do {
+                ipMessage = myRedis.getIPFromList();
+                if (ipMessage == null) {
+                    break;
+                }
+            } while (ipMessage.getUseCount() == 3);
         }
-        readWriteLock.writeLock().unlock();
-
-        readWriteLock.readLock().lock();
-        IPMessage ipMessage;
-        do {
-            ipMessage = myRedis.getIPFromList();
-        } while (ipMessage.getUseCount() == 3);
-        readWriteLock.readLock().unlock();
 
         return ipMessage;
     }
 
     // 放置ip
-    public static void placeIPMessage(IPMessage ipMessage, boolean usable) {
-        ReadWriteLock readWriteLock = MyRedis.getReadWriteLock();
-
+    public void placeIPMessage(IPMessage ipMessage, boolean usable) {
         // 判断ip是否可用
         if (!usable) {
             ipMessage.setUseCount(ipMessage.getUseCount() + 1);
@@ -106,13 +113,13 @@ public class IPProxyPool {
             ipMessage.setUseCount(0);
         }
 
-        readWriteLock.writeLock().lock();
-        myRedis.setIPToList(ipMessage);
-        readWriteLock.writeLock().unlock();
+        synchronized (IPProxyPool.class) {
+            myRedis.setIPToList(ipMessage);
+        }
     }
 
     // 释放Redis资源
-    public static void closeMyRedis() {
+    public void closeMyRedis() {
         myRedis.close();
     }
 }

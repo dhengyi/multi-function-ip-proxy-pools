@@ -3,11 +3,11 @@ package ip.proxy.pool.dbtool;
 import ip.proxy.pool.dbconfig.RedisConfig;
 import ip.proxy.pool.model.IPMessage;
 import ip.proxy.pool.utilclass.SerializeUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 
 import java.util.List;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author dhengyi
@@ -17,18 +17,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MyRedis {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MyRedis.class);
+
     private final Jedis jedis = RedisConfig.getJedis();
-    // 创建一个读写锁（static保证其唯一性）
-    private static ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-
-    // 对外提供读写锁
-    public static ReadWriteLock getReadWriteLock() {
-        return readWriteLock;
-    }
-
-    public static void setReadWriteLock(ReadWriteLock readWriteLock) {
-        MyRedis.readWriteLock = readWriteLock;
-    }
 
     // 将单个ip信息保存在Redis列表中
     public void setIPToList(IPMessage ipMessage) {
