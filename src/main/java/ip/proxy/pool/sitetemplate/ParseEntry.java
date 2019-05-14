@@ -2,10 +2,13 @@ package ip.proxy.pool.sitetemplate;
 
 import ip.proxy.pool.model.HtmlLabelInfo;
 import ip.proxy.pool.model.SiteTemplateInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -21,6 +24,8 @@ import java.util.List;
 
 public class ParseEntry {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ParseEntry.class);
+
     // 解析模板
     public static List<SiteTemplateInfo> parseTemplate() {
         Document doc = getDocument();
@@ -32,18 +37,17 @@ public class ParseEntry {
     private static Document getDocument() {
         String filePath = System.getProperty("user.dir") + "/template/config.xml";
 
-        // TODO: 这里的策略可以进行更新，如果没有指定配置文件，则使用默认策略进行抓取
+        // 如果没有指定配置文件，则使用默认策略进行抓取
         if (!Files.exists(Paths.get(filePath))) {
-            throw new RuntimeException();
+            return null;
         }
 
         SAXReader reader = new SAXReader();
-        Document doc;
+        Document doc = null;
         try {
             doc = reader.read(new File(filePath));
         } catch (DocumentException e) {
             e.printStackTrace();
-            throw new RuntimeException();
         }
 
         return doc;
@@ -51,11 +55,16 @@ public class ParseEntry {
 
     // 将xml文件中的数据存储为Java Bean
     private static List<SiteTemplateInfo> getSiteTemplateInfos(Document doc) {
+        List<SiteTemplateInfo> siteTemplateInfos = new ArrayList<>();
+
+        if (doc == null) {
+            siteTemplateInfos.add(getDefaultSiteTemplateInfo());
+            return siteTemplateInfos;
+        }
+
         Element root = doc.getRootElement();
         Element ips = root.element("ips");
         Integer number = Integer.valueOf(ips.attributeValue("number"));
-
-        List<SiteTemplateInfo> siteTemplateInfos = new ArrayList<>(number);
 
         List<Element> ipElements = ips.elements();
         // subList注意为左闭右开，得到的是一个视图，只能读不能写
@@ -72,6 +81,10 @@ public class ParseEntry {
     }
 
     private static SiteTemplateInfo getSiteTemplateInfo(String url, Element domElement) {
+        if (StringUtils.isEmpty(url) || domElement == null) {
+            return null;
+        }
+
         String label1Name = domElement.element("label_1").elementText("name");
         String attribute1Name = domElement.element("label_1").element("attribute").elementText("name");
         String attribute1Value = domElement.element("label_1").element("attribute").elementText("value");
@@ -85,6 +98,28 @@ public class ParseEntry {
         String label3Name = domElement.element("label_3").elementText("name");
         String attribute3Name = domElement.element("label_3").element("attribute").elementText("name");
         String attribute3Value = domElement.element("label_3").element("attribute").elementText("value");
+        HtmlLabelInfo htmlLabelInfo3 = new HtmlLabelInfo(label3Name, attribute3Name, attribute3Value);
+
+        return new SiteTemplateInfo(url, htmlLabelInfo1, htmlLabelInfo2, htmlLabelInfo3);
+    }
+
+    // 生成默认策略
+    private static SiteTemplateInfo getDefaultSiteTemplateInfo() {
+        String url = "https://www.xicidaili.com/nn/{}";
+
+        String label1Name = "table";
+        String attribute1Name = "id";
+        String attribute1Value = "ip_list";
+        HtmlLabelInfo htmlLabelInfo1 = new HtmlLabelInfo(label1Name, attribute1Name, attribute1Value);
+
+        String label2Name = "null";
+        String attribute2Name = "";
+        String attribute2Value ="";
+        HtmlLabelInfo htmlLabelInfo2 = new HtmlLabelInfo(label2Name, attribute2Name, attribute2Value);
+
+        String label3Name = "tbody";
+        String attribute3Name = "null";
+        String attribute3Value = "";
         HtmlLabelInfo htmlLabelInfo3 = new HtmlLabelInfo(label3Name, attribute3Name, attribute3Value);
 
         return new SiteTemplateInfo(url, htmlLabelInfo1, htmlLabelInfo2, htmlLabelInfo3);

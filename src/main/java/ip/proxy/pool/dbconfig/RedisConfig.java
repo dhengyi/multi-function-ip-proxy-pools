@@ -1,5 +1,8 @@
 package ip.proxy.pool.dbconfig;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPoolConfig;
 
@@ -12,6 +15,8 @@ import java.util.ResourceBundle;
  */
 
 public class RedisConfig {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisConfig.class);
 
     private static final String addr;
     private static final Integer port;
@@ -51,6 +56,13 @@ public class RedisConfig {
 
     // 获取Jedis实例
     public synchronized static Jedis getJedis() {
+        if (StringUtils.isEmpty(addr) || StringUtils.isEmpty(String.valueOf(port)) ||
+                StringUtils.isEmpty(passwd)) {
+            LOGGER.error("redis-config.properties配置文件内容有误，addr：{}，port：{}，passwd：{}",
+                    addr, port, passwd);
+            throw new RuntimeException("redis-config.properties配置文件内容有误");
+        }
+
         // 连接本地的 Redis 服务
         Jedis jedis = new Jedis(addr, port);
         // 权限认证
@@ -60,7 +72,7 @@ public class RedisConfig {
     }
 
     // 释放Jedis资源
-    public static void close(final Jedis jedis) {
+    public static void close(Jedis jedis) {
         if (jedis != null) {
             jedis.close();
         }

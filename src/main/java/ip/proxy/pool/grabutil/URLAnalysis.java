@@ -2,6 +2,7 @@ package ip.proxy.pool.grabutil;
 
 import ip.proxy.pool.model.IPMessage;
 import ip.proxy.pool.model.SiteTemplateInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -25,12 +26,12 @@ public class URLAnalysis {
 
     // 使用本机ip解析网站首页
     public static List<IPMessage> parseURLByRealIP(String url, SiteTemplateInfo siteTemplateInfo) {
-        String html = MyHttpClient.getHtml(url);
-
-        if (html == null) {
-            LOGGER.error("使用本机ip，访问url：{}，返回html：null", url);
-            throw new RuntimeException();
+        if (StringUtils.isEmpty(url) || siteTemplateInfo == null) {
+            LOGGER.error("入参有误，url：{}，siteTemplateInfo：{}", url, siteTemplateInfo);
+            return null;
         }
+
+        String html = MyHttpClient.getHtml(url);
 
         return extractIPMessages(html, siteTemplateInfo);
     }
@@ -38,18 +39,24 @@ public class URLAnalysis {
     // 使用代理ip解析任务队列
     public static List<IPMessage> parseQueueByProxyIP(String url, String ipAddress,
                                                       String ipPort, SiteTemplateInfo siteTemplateInfo) {
-        String html = MyHttpClient.getHtml(url, ipAddress, ipPort);
-
-        if (html == null) {
-            LOGGER.warn("使用代理ip：{}，访问url：{}，返回html：null", ipAddress + ":" + ipPort, url);
+        if (StringUtils.isEmpty(url) || StringUtils.isEmpty(ipAddress) || StringUtils.isEmpty(ipPort) ||
+                siteTemplateInfo == null) {
+            LOGGER.error("入参有误，url：{}，ipAddress：{}，ipPort：{}，siteTemplateInfo：{}",
+                    url, ipAddress, ipPort, siteTemplateInfo);
             return null;
         }
+
+        String html = MyHttpClient.getHtml(url, ipAddress, ipPort);
 
         return extractIPMessages(html, siteTemplateInfo);
     }
 
     // 提取网页代理ip信息
     private static List<IPMessage> extractIPMessages(String html, SiteTemplateInfo siteTemplateInfo) {
+        if (StringUtils.isEmpty(html) || siteTemplateInfo == null) {
+            return null;
+        }
+
         Document document = Jsoup.parse(html);
 
         // 存储ip地址列与端口列所在索引

@@ -15,6 +15,10 @@ public class SerializeUtil {
 
     // 序列化
     public static byte[] serialize(Object object) {
+        if (object == null) {
+            return null;
+        }
+
         ObjectOutputStream oos;
         ByteArrayOutputStream baos;
 
@@ -33,6 +37,10 @@ public class SerializeUtil {
 
     // 反序列化
     public static Object unserialize(byte[] bytes) {
+        if (bytes == null) {
+            return null;
+        }
+
         ByteArrayInputStream bais;
         ObjectInputStream ois;
 

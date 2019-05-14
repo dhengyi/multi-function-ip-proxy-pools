@@ -1,10 +1,13 @@
 package ip.proxy.pool.sitetemplate;
 
+import ip.proxy.pool.utilclass.ParamValidateUtil;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -20,8 +23,16 @@ import java.nio.file.Paths;
 
 public class GenEntry {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(GenEntry.class);
+
     // 生成模板内容
     public static Document genTemplate(Integer number) {
+        // 参数校验
+        if (!ParamValidateUtil.validateRange(1, 5, number)) {
+            LOGGER.error("入参有误，number：{}", number);
+            throw new RuntimeException("config.xml模板生成，入参有误");
+        }
+
         Document doc = DocumentHelper.createDocument();
         // 添加根节点
         Element config = doc.addElement("config");
@@ -70,6 +81,11 @@ public class GenEntry {
 
     // 生成xml文件
     public static void saveDocument(Document doc) {
+        if (doc == null) {
+            LOGGER.error("入参有误，doc：null");
+            throw new RuntimeException("保存config.xml文件，入参有误");
+        }
+
         String rootPath = System.getProperty("user.dir");
         Path dirPath = Paths.get(rootPath + "/template");
         Path filePath = Paths.get(dirPath.toString() + "/config.xml");

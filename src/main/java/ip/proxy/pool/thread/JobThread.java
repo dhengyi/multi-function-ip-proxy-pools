@@ -43,8 +43,9 @@ public class JobThread implements Runnable {
             IPMessage ipMessage = IPExtraction.getIPMessageRandom(ipMessages);
             readWriteLock.readLock().unlock();
 
-            ipMessagesTemp = URLAnalysis.parseQueueByProxyIP(url, ipMessage.getIpAddress(),
-                    ipMessage.getIpPort(), siteTemplateInfo);
+            ipMessagesTemp = URLAnalysis.parseQueueByProxyIP(url,
+                    ipMessage != null ? ipMessage.getIpAddress() : null,
+                    ipMessage != null ? ipMessage.getIpPort() : null, siteTemplateInfo);
         } while (ipMessagesTemp == null);
 
         readWriteLock.writeLock().lock();

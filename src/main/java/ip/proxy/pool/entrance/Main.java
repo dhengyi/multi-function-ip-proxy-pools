@@ -1,7 +1,6 @@
 package ip.proxy.pool.entrance;
 
 import ip.proxy.pool.dbtool.MyRedis;
-import ip.proxy.pool.logutil.LogManager;
 import ip.proxy.pool.model.IPMessage;
 import ip.proxy.pool.thread.SiteThread;
 import ip.proxy.pool.model.SiteTemplateInfo;
@@ -53,6 +52,8 @@ public class Main {
 
         // 将ip存储至Redis数据库中
         myRedis.setIPToList(ipMessagesAll);
+
+        myRedis.close();
 
         LOGGER.info("ip代理池更新完毕，ipMessagesAll.size：{}", ipMessagesAll.size());
     }

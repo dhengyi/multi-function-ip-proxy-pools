@@ -6,6 +6,7 @@ import ip.proxy.pool.logutil.LogManager;
 import ip.proxy.pool.model.IPMessage;
 import ip.proxy.pool.sitetemplate.GenEntry;
 import ip.proxy.pool.utilclass.ParamValidateUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.concurrent.locks.ReadWriteLock;
 
 /**
  * @author dhengyi
@@ -38,12 +38,13 @@ public class IPProxyPool {
     }
 
     public static void genTemplate(Integer number) {
-        LOGGER.info("模板生成中...");
-
         // 参数校验
         if (!ParamValidateUtil.validateRange(1, 5, number)) {
-            throw new RuntimeException();
+            LOGGER.error("入参有误，number：{}", number);
+            throw new RuntimeException("config.xml模板生成，入参有误");
         }
+
+        LOGGER.info("模板生成中...");
 
         Document doc = GenEntry.genTemplate(number);
         GenEntry.saveDocument(doc);
@@ -53,23 +54,26 @@ public class IPProxyPool {
 
     // TODO: 需要确定打包之后是否还可正常写入文件
     // 配置Redis环境
-    public static void setMyRedisConfig(String addr, String port, String passwd) {
+    public static void setMyRedisConfig(String addr, Integer port, String passwd) {
+        if (StringUtils.isEmpty(addr) || StringUtils.isEmpty(String.valueOf(port)) || StringUtils.isEmpty(passwd)) {
+            LOGGER.error("入参有误，addr：{}, port：{}，passwd：{}", addr, port, passwd);
+            throw new RuntimeException("Redis配置设定，入参有误");
+        }
+
         Properties properties = new Properties();
 
         try {
             FileOutputStream fileOutputStream = new FileOutputStream("src/main/resources/redis-config.properties");
 
             properties.setProperty("jedis.addr", addr);
-            properties.setProperty("jedis.port", port);
+            properties.setProperty("jedis.port", String.valueOf(port));
             properties.setProperty("jedis.passwd", passwd);
 
             properties.store(fileOutputStream, null);
 
             fileOutputStream.close();
         } catch (IOException e) {
-            LOGGER.info("Redis配置写入redis-config.properties文件出现异常");
-            LOGGER.error("Redis配置写入redis-config.properties文件出现异常，e：{}", e);
-            throw new RuntimeException();
+            e.printStackTrace();
         }
     }
 
@@ -106,6 +110,10 @@ public class IPProxyPool {
 
     // 放置ip
     public void placeIPMessage(IPMessage ipMessage, boolean usable) {
+        if (ipMessage == null) {
+            return;
+        }
+
         // 判断ip是否可用
         if (!usable) {
             ipMessage.setUseCount(ipMessage.getUseCount() + 1);

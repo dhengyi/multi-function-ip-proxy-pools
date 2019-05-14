@@ -1,5 +1,6 @@
 package ip.proxy.pool.grabutil;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
@@ -35,6 +36,11 @@ public class MyHttpClient {
 
     // 使用本机ip构造请求
     public static String getHtml(String url) {
+        if (StringUtils.isEmpty(url)) {
+            LOGGER.error("入参有误，url：{}", url);
+            return null;
+        }
+
         CloseableHttpClient httpClient = getHttpClient();
         String entity = null;
         CloseableHttpResponse httpResponse = null;
@@ -65,10 +71,10 @@ public class MyHttpClient {
                 entity = EntityUtils.toString(httpResponse.getEntity(), "utf-8");
                 LOGGER.info("使用本机ip成功抓取：{}，返回状态码httpStatus：{}", url, httpStatus);
             } else {
-                LOGGER.warn("使用本机ip抓取：{}失败，返回状态码httpStatus：{}", url, httpStatus);
+                LOGGER.error("使用本机ip抓取：{}失败，返回状态码httpStatus：{}", url, httpStatus);
             }
         } catch (IOException e) {
-            LOGGER.error("使用本机ip抓取：" + url + "，出现异常e：{}", e);
+            e.printStackTrace();
         } finally {
             closeResources(httpResponse, httpClient);
         }
@@ -78,6 +84,11 @@ public class MyHttpClient {
 
     // 对上一个方法的重载，使用代理进行网站爬取
     public static String getHtml(String url, String ipAddress, String ipPort) {
+        if (StringUtils.isEmpty(url) || StringUtils.isEmpty(ipAddress) || StringUtils.isEmpty(ipPort)) {
+            LOGGER.warn("入参有误，url：{}，ipAddress：{}，ipPort：{}", url, ipAddress, ipPort);
+            return null;
+        }
+
         CloseableHttpClient httpClient = getHttpClient();
         String entity = null;
         CloseableHttpResponse httpResponse = null;
@@ -172,7 +183,7 @@ public class MyHttpClient {
                 httpClient.close();
             }
         } catch (IOException e) {
-            LOGGER.error("httpResponse，httpClient资源关闭出现异常，e：{}", e);
+            LOGGER.warn("httpResponse，httpClient资源关闭出现异常，e：{}", e);
         }
     }
 }
