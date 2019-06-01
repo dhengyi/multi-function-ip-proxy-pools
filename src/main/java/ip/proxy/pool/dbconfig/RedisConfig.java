@@ -18,19 +18,12 @@ public class RedisConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisConfig.class);
 
-    private static final String addr;
-    private static final Integer port;
-    private static final String passwd;
-
-    // 加载配置文件
-    private static ResourceBundle rb = ResourceBundle.getBundle("redis-config");
+    private static String addr;
+    private static Integer port;
+    private static String passwd;
 
     // 初始化连接
     static {
-        addr = rb.getString("jedis.addr");
-        port = Integer.valueOf(rb.getString("jedis.port"));
-        passwd = rb.getString("jedis.passwd");
-
         try {
             // 先进行redis数据的参数配置
             JedisPoolConfig config = new JedisPoolConfig();
@@ -52,6 +45,13 @@ public class RedisConfig {
         } catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    // 设置Jedis连接Redis数据库参数
+    public static void setJedis(String redisAddr, Integer redisPort, String redisPasswd) {
+        addr = redisAddr;
+        port = redisPort;
+        passwd = redisPasswd;
     }
 
     // 获取Jedis实例

@@ -1,5 +1,6 @@
 package ip.proxy.pool.api;
 
+import ip.proxy.pool.dbconfig.RedisConfig;
 import ip.proxy.pool.dbtool.MyRedis;
 import ip.proxy.pool.entrance.Main;
 import ip.proxy.pool.logutil.LogManager;
@@ -23,6 +24,7 @@ import java.util.Properties;
 
 public class IPProxyPool {
 
+    // 初始化日志环境
     static {
         LogManager.init();
     }
@@ -60,21 +62,7 @@ public class IPProxyPool {
             throw new RuntimeException("Redis配置设定，入参有误");
         }
 
-        Properties properties = new Properties();
-
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream("src/main/resources/redis-config.properties");
-
-            properties.setProperty("jedis.addr", addr);
-            properties.setProperty("jedis.port", String.valueOf(port));
-            properties.setProperty("jedis.passwd", passwd);
-
-            properties.store(fileOutputStream, null);
-
-            fileOutputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        RedisConfig.setJedis(addr, port, passwd);
     }
 
     /*
@@ -83,18 +71,12 @@ public class IPProxyPool {
      */
     public IPMessage getIPMessage() {
         IPMessage ipMessage;
-        // 判断ip代理池是否已经启动更新
-        boolean flag = false;
 
         // 当ip代理池为空时，更新ip代理池
         synchronized (IPProxyPool.class) {
-            while (myRedis.isEmpty()) {
+            if (myRedis.isEmpty()) {
                 LOGGER.info("IPProxyPool已空");
-                if (!flag) {
-                    Main.startExecute();
-                }
-
-                flag = true;
+                Main.startExecute();
             }
 
             do {

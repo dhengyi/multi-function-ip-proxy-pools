@@ -3,7 +3,7 @@ package ip.proxy.pool.model;
 /**
  * @author dhengyi
  * @create 2019/05/06 10:39
- * @description 网站解析模板--config.xml，所对应的Java Bean
+ * @description 网站解析模板--example-template.xml，所对应的Java Bean
  */
 
 public class SiteTemplateInfo {
